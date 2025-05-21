@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import date
+from datetime import date, timedelta
 
 from telegram import Bot
 
@@ -8,7 +8,14 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = int(os.environ["CHAT_ID"])  # safer to keep chat ID out of code too
 
 
-poll_question = f"Кружок в субботу ({date.today().isoformat()})"
+# Function to calculate the closest Saturday
+def get_closest_saturday():
+    today = date.today()
+    days_until_saturday = (5 - today.weekday()) % 7  # Saturday is weekday 5
+    return today + timedelta(days=days_until_saturday)
+
+closest_saturday = get_closest_saturday()
+poll_question = f"Кружок в субботу ({closest_saturday.isoformat()})"
 poll_options = [
     "Приду онлайн",
     "Приду онлайн или оффлайн",
