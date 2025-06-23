@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import os
 from datetime import date, timedelta
@@ -8,30 +9,60 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = int(os.environ["CHAT_ID"])  # safer to keep chat ID out of code too
 
 
-# Function to calculate the closest Saturday
-def get_closest_saturday():
+def get_closest_weekday(target_weekday):
     today = date.today()
-    days_until_saturday = (5 - today.weekday()) % 7  # Saturday is weekday 5
-    return today + timedelta(days=days_until_saturday)
+    days_until = (target_weekday - today.weekday()) % 7
+    return today + timedelta(days=days_until)
 
-closest_saturday = get_closest_saturday()
-poll_question = f"Кружок в субботу ({closest_saturday.isoformat()})"
-poll_options = [
-    "Приду онлайн",
-    "Приду онлайн или оффлайн",
-    "Приду оффлайн",
-    "Не приду",
-]
 
-async def send_poll():
+def get_poll_data(poll_type):
+    if poll_type == "choose_day":
+        closest_friday = get_closest_weekday(4)  # 4=Fri
+        closest_saturday = get_closest_weekday(5)  # 5=Sat
+        poll_question = f"Выбираем день встречи"
+        poll_options = [
+            f"Пятница вечер ({closest_friday.isoformat()})",
+            f"Суббота ({closest_saturday.isoformat()})",
+            "Не приду",
+        ]
+    elif poll_type == "choose_time":
+        poll_question = "Выбираем время встречи"
+        poll_options = [
+            "После 12pm",
+            "После 1pm",
+            "После 2pm",
+            "После 3pm",
+            "После 4pm",
+            "После 5pm",
+            "После 6pm",
+            "После 7pm",
+            "Не приду",
+        ]
+    else:
+        raise ValueError("Unknown poll type. Use 'choose_day' or 'choose_time'.")
+    return poll_question, poll_options
+
+
+async def send_poll(poll_type):
+    poll_question, poll_options = get_poll_data(poll_type)
     bot = Bot(token=BOT_TOKEN)
     await bot.send_poll(
         chat_id=CHAT_ID,
         question=poll_question,
         options=poll_options,
-        is_anonymous=False  # Optional, keep responses public
+        is_anonymous=False,
     )
 
 
 if __name__ == "__main__":
-    asyncio.run(send_poll())
+    parser = argparse.ArgumentParser(
+        description="Send a Telegram poll for choosing day or choosing time."
+    )
+    parser.add_argument(
+        "--poll",
+        choices=["choose_day", "choose_time"],
+        required=True,
+        help="Which poll to send",
+    )
+    args = parser.parse_args()
+    asyncio.run(send_poll(args.poll))
