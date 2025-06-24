@@ -51,6 +51,7 @@ async def send_poll(poll_type):
         question=poll_question,
         options=poll_options,
         is_anonymous=False,
+        allows_multiple_answers=True,
     )
 
 
