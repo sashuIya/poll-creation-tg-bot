@@ -17,12 +17,12 @@ def get_closest_weekday(target_weekday):
 
 def get_poll_data(poll_type):
     if poll_type == "choose_day":
-        closest_friday = get_closest_weekday(4)  # 4=Fri
         closest_saturday = get_closest_weekday(5)  # 5=Sat
+        closest_sunday = get_closest_weekday(6)  # 6=Sun
         poll_question = f"Выбираем день встречи"
         poll_options = [
-            f"Пятница вечер ({closest_friday.isoformat()})",
             f"Суббота ({closest_saturday.isoformat()})",
+            f"Воскресенье ({closest_sunday.isoformat()})",
             "Не приду",
         ]
     elif poll_type == "choose_time":
